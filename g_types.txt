@@ -1,0 +1,66 @@
+GValue pointer
+type for GFileInfo = G_TYPE_FILE_INFO
+
+GFileInfo* / GValue*
+
+is GFileInfo* a GValue*
+
+GValue *ff
+init with type file_info
+assign value
+
+pass to list
+
+get back from list
+
+set type to file_info
+use as a FI pointer
+
+how is gpointer defined?
+
+#define G_IS_FILE_INFO(o)        						(G_TYPE_CHECK_INSTANCE_TYPE ((o), G_TYPE_FILE_INFO))
+#define G_TYPE_CHECK_INSTANCE_TYPE(instance, g_type)    (_G_TYPE_CIT ((instance), (g_type)))
+#define _G_TYPE_CIT(ip, gt)             				(g_type_check_instance_is_a ((GTypeInstance*) ip, gt))
+
+
+struct _GTypeInstance
+{
+  /*< private >*/
+  GTypeClass *g_class;
+};
+
+struct _GTypeClass
+{
+  /*< private >*/
+  GType g_type;
+};
+
+./glib-2.0/gobject/glib-types.h:	typedef gsize GType;
+
+typedef unsigned long gsize;
+
+
+typedef struct _GValue                  GValue;
+
+struct _GValue
+{
+  /*< private >*/
+  GType		g_type;
+
+  /* public for GTypeValueTable methods */
+  union {
+    gint	v_int;
+    guint	v_uint;
+    glong	v_long;
+    gulong	v_ulong;
+    gint64      v_int64;
+    guint64     v_uint64;
+    gfloat	v_float;
+    gdouble	v_double;
+    gpointer	v_pointer;
+  } data[2];
+};
+
+list->next / list->data ?
+
+
