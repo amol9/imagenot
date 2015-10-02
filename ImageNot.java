@@ -18,7 +18,8 @@ import java.util.Arrays;
 import java.lang.ProcessBuilder;
 import java.io.IOException;
 
-class Deleter {
+
+class MainWindow {
 	private String sourcePath;
 	private String trashPath;
 	private String[] jpgList;
@@ -26,24 +27,25 @@ class Deleter {
 	private Image i;
 	private int currentFile;
 
-	public Deleter(String sp, String tp) {
+
+	public MainWindow(String sp, String tp) {
 		trashPath = tp;
 		sourcePath = sp;
 
 		String[] gtk_args = null;
-        Gtk.init(gtk_args);
+		Gtk.init(gtk_args);
 
-        w = new Window();
+		w = new Window();
 		w.setDefaultSize(800, 600);
 
-        w.showAll();
+		w.showAll();
 
 		scanSourcePath();
 
-		class DeleterKPE implements Window.KeyPressEvent {
-			private Deleter d;
+		class MainWindowKPE implements Window.KeyPressEvent {
+			private MainWindow d;
 
-			public DeleterKPE(Deleter dd) {
+			public MainWindowKPE(MainWindow dd) {
 				d = dd;
 			}
 
@@ -66,17 +68,18 @@ class Deleter {
 			}
 		}		
 
-		w.connect(new DeleterKPE(this));
+		w.connect(new MainWindowKPE(this));
     
-        w.connect(new Window.DeleteEvent() {
-            public boolean onDeleteEvent(Widget source, Event event) {
-                Gtk.mainQuit();
-                return false;
-            }
-        });
+		w.connect(new Window.DeleteEvent() {
+		    public boolean onDeleteEvent(Widget source, Event event) {
+			Gtk.mainQuit();
+			return false;
+		    }
+		});
       
-        Gtk.main();
+		Gtk.main();
 	}
+
 
 	private void setImage(String filename) {
 		if (i != null) {
@@ -88,7 +91,6 @@ class Deleter {
 
 		Pixbuf pb = null;
 		try {
-			//System.out.println(sourcePath + "/" + filename);
 			pb = new Pixbuf(sourcePath + "/" + filename);
 		}
 		catch (FileNotFoundException e) {
@@ -121,6 +123,7 @@ class Deleter {
 		w.showAll();
 	}
 
+
 	private void trashImage() {
 		ProcessBuilder pb = new ProcessBuilder("mv", sourcePath + "/" + jpgList[currentFile], trashPath);
 		try {
@@ -129,17 +132,20 @@ class Deleter {
 		}
 	}
 
+
 	private void nextImage() {
 		if (currentFile < jpgList.length - 1)
 			currentFile++;
 		setImage(jpgList[currentFile]);
 	}
 
+
 	private void prevImage() {
 		if (currentFile > 0)
 			currentFile--;
 		setImage(jpgList[currentFile]);
 	}
+
 
 	private void scanSourcePath() {
 		File sourceFolder = new File(sourcePath);
@@ -160,6 +166,7 @@ class Deleter {
 		setImage(jpgList[0]);
 	}
 
+
 	public void openTrash() {
 		ProcessBuilder pb = new ProcessBuilder("gnome-open", trashPath);
 		try {
@@ -169,17 +176,19 @@ class Deleter {
 	}
 }
 
-public class First
+
+public class ImageNot
 {
     public static void main(String[] args) {
 		int argn = args.length;
 
 		if (argn < 2) {
-			System.out.println("usage: command source_path trash_path");
+			System.out.println("arguments: source_dirpath trash_dirpath");
 			System.exit(1);
 		}
 		
-		Deleter d = new Deleter(args[0], args[1]);
+		MainWindow d = new MainWindow(args[0], args[1]);
 		d.openTrash();		
     }
 }
+

@@ -6,15 +6,16 @@
 #include <gio/gio.h>
 #include <string.h>
 
+
 GtkWindow *w = NULL;
 GtkImage *i = NULL;
 GList *jpgList = NULL;
 GList* currentFile;
 const char *trash_path = NULL; 
 
+
 void set_image(const char* filename) {
 	if (i != 0) {
-		//gtk_container_remove(w, i);
 		gtk_widget_destroy(i);
 		i = NULL;
 	}
@@ -56,6 +57,7 @@ void set_image(const char* filename) {
 
 }
 
+
 int compare_func(const GFileInfo* a, const GFileInfo* b) {
 	const char *name_a, *name_b;
 	
@@ -64,6 +66,7 @@ int compare_func(const GFileInfo* a, const GFileInfo* b) {
 
 	return strcmp(name_a, name_b);	
 }
+
 
 void scan_source_dir(const char* source_dir) {
 	GFile *src = g_file_new_for_path(source_dir);
@@ -90,17 +93,12 @@ void scan_source_dir(const char* source_dir) {
 	GCompareFunc gcf = compare_func;
 	jpgList = g_list_sort(jpgList, gcf);	
 
-	/*GList *e = g_list_first(jpgList);	
-	for(e = g_list_first(jpgList); e; e = g_list_next(e)) {
-		fi = (GFileInfo*)e->data;
-		printf("%s\n", g_file_info_get_name(fi));
-	}*/
-
 	currentFile = g_list_first(jpgList);
 	set_image(g_file_info_get_name((GFileInfo*)currentFile->data));
 
 	g_object_unref(src);
 }
+
 
 void check_and_set_current_file(GList *t) {
 	if (t != NULL) {
@@ -109,15 +107,18 @@ void check_and_set_current_file(GList *t) {
 	}
 }
 
+
 void next_image() {
 	GList *t = g_list_next(currentFile);
 	check_and_set_current_file(t);
 }
 
+
 void prev_image() {
 	GList *t = g_list_previous(currentFile);
 	check_and_set_current_file(t);
 }
+
 
 void trash_image() {
 	char *cmd = (char*)malloc(sizeof(char)*1000);
@@ -128,9 +129,9 @@ void trash_image() {
 	strcat(cmd, " ");
 	strcat(cmd, trash_path);
 
-	//printf("%s\n", cmd);
 	system(cmd);
 }
+
 
 gboolean on_key_press_event(GtkWindow *wi, GdkEventKey *ev, gpointer data) {
 	const char* key = gdk_keyval_name(ev->keyval);
@@ -145,10 +146,11 @@ gboolean on_key_press_event(GtkWindow *wi, GdkEventKey *ev, gpointer data) {
 	return FALSE;
 }
 
+
 int main(int argc, char* argv[]) {
 
 	if (argc < 3) {
-		printf("usage: command source_dir trash_dir\n");
+		printf("arguments: source_dirpath trash_dirpath\n");
 		return 0;
 	}	
 
@@ -169,3 +171,4 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+

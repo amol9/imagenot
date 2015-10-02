@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from gi.repository import Gtk
 from gi.repository.GdkPixbuf import Pixbuf, InterpType
 from gi.repository import Gdk
@@ -7,6 +5,7 @@ import sys
 import os
 import glob
 import shutil
+
 
 class MyWindow(Gtk.Window):
 
@@ -77,15 +76,16 @@ class MyWindow(Gtk.Window):
 		self.currentFile = 0
 		self.set_image(self.jpgList[0])
 
+
 	def set_trashPath(self, trashPath):
 		self.trashPath = trashPath
 
 
-#== main program ===============>
+#main program
 
 argc = len(sys.argv)
 if (argc < 3):
-	print "usage: command source_folder trash_folder"
+	print "arguments: source_dirpath trash_dirpath"
 	quit()
 
 trashPath = sys.argv[2]
@@ -98,3 +98,4 @@ win.show_all()
 Gtk.main()
 
 os.system("gnome-open " + trashPath)
+
