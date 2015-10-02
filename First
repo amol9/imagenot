@@ -1,3 +1,0 @@
-#! /bin/bash
-
-java -classpath /usr/share/java/gtk-4.1.jar:. First $1 $2
