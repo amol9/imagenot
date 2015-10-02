@@ -16,7 +16,7 @@ I did this as an experiment to observe two things:
 
 #. How to interface with gtk in different languages.
 
-#. How long it'll take to develop program in each of the languages.
+#. How long it'll take to develop the exact same program in each of the languages.
 
 Conclusions:
 
@@ -34,8 +34,22 @@ Build all language versions::
 
 Build individual versions::
 
-        make java
-        make c
+        make build_java
+        make build_c
+
+
+Install
+=======
+
+Install default version (c)::
+
+        make install
+
+Install individual language versions::
+
+        make install_py
+        make install_java
+        make install_c
 
 
 Usage
@@ -43,14 +57,9 @@ Usage
 
 Launch the application with command line arguments: source dir path, trash dir path
 
-e.g. `> imagenot ~/Pictures/2015 ./trash`
+e.g. `> imagenot . ./trash`
 
 Once the window shows, use left and right arrow keys to move back and forth through the images. Press "d" to delete the current image.
-
-You can launch the different language versions using make::
-        make run_py
-        make run_java
-        make run_c
 
 
 Dependencies

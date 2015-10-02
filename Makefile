@@ -51,7 +51,7 @@ install_java: build_java
 	${MKDIR} ${SHARE_PATH}/imagenot
 	${CP} ${BIN}/java/*.* ${SHARE_PATH}/imagenot
 	${RM} ${INSTALL_PATH}/imagenot
-	${PRINTF} "#!/bin/bash\n${JAVA} -classpath ${SHARE_PATH}/java/gtk.jar:${SHARE_PATH}/imagenot ImageNot $1 $2" > ${INSTALL_PATH}/imagenot
+	${PRINTF} "#!/bin/bash\n${JAVA} -classpath ${SHARE_PATH}/java/gtk.jar:${SHARE_PATH}/imagenot ImageNot \$$1 \$$2" > ${INSTALL_PATH}/imagenot
 	${CHMOD_X} ${INSTALL_PATH}/imagenot
 
 
