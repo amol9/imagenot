@@ -12,6 +12,7 @@ GtkImage *i = NULL;
 GList *jpgList = NULL;
 GList* currentFile;
 const char *trash_path = NULL; 
+const char *source_path = NULL; 
 
 
 void set_image(const char* filename) {
@@ -57,7 +58,6 @@ void set_image(const char* filename) {
 
 }
 
-
 int compare_func(const GFileInfo* a, const GFileInfo* b) {
 	const char *name_a, *name_b;
 	
@@ -67,13 +67,19 @@ int compare_func(const GFileInfo* a, const GFileInfo* b) {
 	return strcmp(name_a, name_b);	
 }
 
+const char* join_path(const char* path1, const char* path2) {
+	char last_char = path1[strlen(path1) - 1];
+	char* fullpath = (char*) malloc(strlen(path1) + strlen(path2) + last_char == '/' ? 1 : 2);
 
-void scan_source_dir(const char* source_dir) {
-	GFile *src = g_file_new_for_path(source_dir);
+	const char* fmt_string = last_char == '/' ? "%s%s" : "%s/%s";
+	sprintf(fullpath, fmt_string, path1, path2);
+	return fullpath;
+}
+
+void scan_source_dir() {
+	GFile *src = g_file_new_for_path(source_path);
 	GError *err = NULL;
 
-	chdir(source_dir);
-	
 	GFileEnumerator *files = g_file_enumerate_children(src, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, &err);
 	if (files == NULL) {
 		printf("error: %s", err->message);
@@ -94,44 +100,43 @@ void scan_source_dir(const char* source_dir) {
 	jpgList = g_list_sort(jpgList, gcf);	
 
 	currentFile = g_list_first(jpgList);
-	set_image(g_file_info_get_name((GFileInfo*)currentFile->data));
+	const char* currentFilePath = join_path(source_path, g_file_info_get_name((GFileInfo*)currentFile->data));
+	set_image(currentFilePath);
+	free(currentFilePath);
 
 	g_object_unref(src);
 }
 
-
 void check_and_set_current_file(GList *t) {
 	if (t != NULL) {
 		currentFile = t;
-		set_image(g_file_info_get_name((GFileInfo*)currentFile->data));
+		const char* currentFilePath = join_path(source_path, g_file_info_get_name((GFileInfo*)currentFile->data));
+		set_image(currentFilePath);
+
+		free(currentFilePath);
 	}
 }
-
 
 void next_image() {
 	GList *t = g_list_next(currentFile);
 	check_and_set_current_file(t);
 }
 
-
 void prev_image() {
 	GList *t = g_list_previous(currentFile);
 	check_and_set_current_file(t);
 }
 
-
 void trash_image() {
-	char *cmd = (char*)malloc(sizeof(char)*1000);
-	cmd[0] = 0;
-
-	strcat(cmd, "mv ");
-	strcat(cmd, g_file_info_get_name((GFileInfo*)currentFile->data));
-	strcat(cmd, " ");
-	strcat(cmd, trash_path);
+	const char* currentFilePath = join_path(source_path, g_file_info_get_name((GFileInfo*)currentFile->data));
+	char *cmd = (char*)malloc(strlen(currentFilePath) + strlen(trash_path) + 10);
+	sprintf(cmd, "mv %s %s", currentFilePath, trash_path);
 
 	system(cmd);
-}
 
+	free(currentFilePath);
+	free(cmd);
+}
 
 gboolean on_key_press_event(GtkWindow *wi, GdkEventKey *ev, gpointer data) {
 	const char* key = gdk_keyval_name(ev->keyval);
@@ -145,7 +150,6 @@ gboolean on_key_press_event(GtkWindow *wi, GdkEventKey *ev, gpointer data) {
 
 	return FALSE;
 }
-
 
 int main(int argc, char* argv[]) {
 
@@ -164,8 +168,10 @@ int main(int argc, char* argv[]) {
 
 	gtk_widget_show(w);
 
-	trash_path = argv[2];	
-	scan_source_dir(argv[1]);
+	trash_path = argv[2];
+	source_path = argv[1];
+
+	scan_source_dir();
 	
 	gtk_main();
 
