@@ -5,14 +5,17 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 
-GtkWindow *w = NULL;
-GtkImage *i = NULL;
-GList *jpgList = NULL;
-GList* currentFile;
-const char *trash_path = NULL; 
-const char *source_path = NULL; 
+const char* extensions[] = {".jpg", ".bmp", ".png", ".jpeg", ".gif"};
+
+GtkWindow *w 		= NULL;
+GtkImage *i 		= NULL;
+GList *imageList 	= NULL;
+GList* currentFile	= NULL;
+const char *trash_path 	= NULL; 
+const char *source_path = NULL;
 
 
 void set_image(const char* filename) {
@@ -76,6 +79,16 @@ const char* join_path(const char* path1, const char* path2) {
 	return fullpath;
 }
 
+gboolean is_image_filename(filename) {
+	int i;
+	for (i = 0; i < (sizeof(extensions) / sizeof(char*)); i++) {
+		if (g_str_has_suffix(filename, extensions[i])) {
+		       return 1;
+		}
+	}
+	return 0;	
+}
+
 void scan_source_dir() {
 	GFile *src = g_file_new_for_path(source_path);
 	GError *err = NULL;
@@ -92,14 +105,14 @@ void scan_source_dir() {
 	while ((fi = g_file_enumerator_next_file(files, NULL, NULL)) != NULL) {
 		const char *filename = g_file_info_get_name(fi);
 
-		if(g_str_has_suffix(filename, ".jpg"))
-			jpgList = g_list_prepend(jpgList, fi);
+		if(is_image_filename(filename))
+			imageList = g_list_prepend(imageList, fi);
 	}
 
 	GCompareFunc gcf = compare_func;
-	jpgList = g_list_sort(jpgList, gcf);	
+	imageList = g_list_sort(imageList, gcf);	
 
-	currentFile = g_list_first(jpgList);
+	currentFile = g_list_first(imageList);
 	const char* currentFilePath = join_path(source_path, g_file_info_get_name((GFileInfo*)currentFile->data));
 	set_image(currentFilePath);
 	free(currentFilePath);
@@ -151,12 +164,33 @@ gboolean on_key_press_event(GtkWindow *wi, GdkEventKey *ev, gpointer data) {
 	return FALSE;
 }
 
+gboolean is_dir(const char* path) {
+	struct stat path_stat;
+	if (stat(path, &path_stat) == -1) {
+		return 0;
+	}
+	return S_ISDIR(path_stat.st_mode);
+}
+
 int main(int argc, char* argv[]) {
 
 	if (argc < 3) {
 		printf("arguments: source_dirpath trash_dirpath\n");
 		return 0;
 	}	
+	
+	source_path = argv[1];
+	trash_path = argv[2];
+
+	if (! is_dir(source_path)) {
+		printf("%s is not a directory\n", source_path);
+		return -1;
+	}
+
+	if (! is_dir(trash_path)) {
+		printf("%s is not a directory\n", trash_path);
+		return -1;
+	}
 
 	gtk_init(NULL, NULL);	
 
@@ -167,9 +201,6 @@ int main(int argc, char* argv[]) {
 	g_signal_connect(w, "key-press-event", G_CALLBACK(on_key_press_event), NULL);
 
 	gtk_widget_show(w);
-
-	trash_path = argv[2];
-	source_path = argv[1];
 
 	scan_source_dir();
 	
